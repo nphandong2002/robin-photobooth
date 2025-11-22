@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/lib/prisma/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String?
+  provider      String? // 'credentials' | 'google'
+  image         String?
+  emailVerified DateTime? @map("email_verified")
+
+  verified   Boolean   @default(false)
+  verifyCode String?
+  verifyExp  DateTime?
+
+  accounts Account[]
+  sessions Session[]
+
+  createdAt DateTime @default(now())
+  photos    Photo[]
+  rooms     Room[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([email, token])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Room {
+  id         String   @id @default(cuid())
+  code       String   @unique // join code
+  title      String?
+  createdAt  DateTime @default(now())
+  hostId     String?
+  host       User?    @relation(fields: [hostId], references: [id])
+  maxMembers Int      @default(8) // giới hạn số người, mặc định 8
+  locked     Boolean  @default(false) // trạng thái khoá phòng
+  photos     Photo[]
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id])
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  url       String
+  thumbUrl  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
