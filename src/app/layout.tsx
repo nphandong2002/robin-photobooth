@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 import AuthProvicer from 'src/shared/providers/AuthProvider';
+import { Toaster } from 'src/shared/components/ui/sonner';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_NAME;
 export const metadata: Metadata = {
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <AuthProvicer>{children}</AuthProvicer>
+        <Toaster />
       </body>
     </html>
   );
