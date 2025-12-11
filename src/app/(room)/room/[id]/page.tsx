@@ -1,12 +1,14 @@
 'use client';
 
+import { toast } from 'sonner';
+import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+
 import { Button } from 'src/shared/components/ui/button';
 import { Skeleton } from 'src/shared/components/ui/skeleton';
 import AvatarMenu from 'src/shared/components/user-avatar/AvatarMenu';
+
 import LiveVideo from './_sections/live-video';
 
 function RoomDetail() {
@@ -15,7 +17,6 @@ function RoomDetail() {
   const { data: session, status } = useSession();
   const [room, setRoom] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   const router = useRouter();
   useEffect(() => {
@@ -30,7 +31,8 @@ function RoomDetail() {
         const data = await response.json();
         setRoom(data);
       } catch (err) {
-        setError('Phòng không tồn tại');
+        toast.error('Phòng không tồn tại');
+        router.push('/');
         console.error(err);
       } finally {
         setLoading(false);
